@@ -82,7 +82,7 @@ void FinalDisparoIR (fsm_t* this);
 void ImpactoDetectado (fsm_t* this);
 void FinalizaJuego (fsm_t* this);
 
-// Prototipos de procedimientos de atencion a las interrupciones
+// Prototipos de procedimientos de atencion a las interrupcioneS
 void timer_duracion_disparo_isr (union sigval value);
 void impacto_isr(void);
 

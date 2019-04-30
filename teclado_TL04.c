@@ -265,10 +265,9 @@ void process_key (fsm_t* this) {
 			case 'F':
 				piLock(SYSTEM_FLAGS_KEY);
 				flags_juego |= FLAG_SYSTEM_END;
+				piUnlock(SYSTEM_FLAGS_KEY);
 				printf("Tecla F pulsada!\n");
 				fflush(stdout);
-				piUnlock(SYSTEM_FLAGS_KEY);
-				exit(0);
 				break;
 			}
 			break;
@@ -345,35 +344,3 @@ int initialize(TipoTeclado *p_teclado) {
 
 	return 0;
 }
-
-/*int main () {
-	unsigned int next;
-
-	fsm_trans_t columns[] = {
-		{ KEY_COL_1, CompruebaColumnTimeout, KEY_COL_2, col_2 },
-		{ KEY_COL_2, CompruebaColumnTimeout, KEY_COL_3, col_3 },
-		{ KEY_COL_3, CompruebaColumnTimeout, KEY_COL_4, col_4 },
-		{ KEY_COL_4, CompruebaColumnTimeout, KEY_COL_1, col_1 },
-		{-1, NULL, -1, NULL },
-	};
-
-	fsm_trans_t keypad[] = {
-		{ KEY_WAITING, key_pressed, KEY_WAITING, process_key},
-		{-1, NULL, -1, NULL },
-	};
-
-	initialize(&teclado);
-
-	fsm_t* columns_fsm = fsm_new (KEY_COL_1, columns, &teclado);
-	fsm_t* keypad_fsm = fsm_new (KEY_WAITING, keypad, &teclado);
-
-	next = millis();
-	while (1) {
-		fsm_fire (columns_fsm);
-		fsm_fire (keypad_fsm);
-
-		next += CLK_MS;
-		delay_until (next);
-	}
-	return 0;
-}*/
