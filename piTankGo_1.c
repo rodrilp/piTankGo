@@ -61,6 +61,7 @@ int ConfiguraSistema (TipoSistema *p_sistema) {
 // la inicializacion de los diferentes elementos de los que consta nuestro sistema,
 // la torreta, los efectos, etc.
 // igualmente arrancará el thread de exploración del teclado del PC
+
 int InicializaSistema (TipoSistema *p_sistema) {
 	int result = 0;
 
@@ -97,7 +98,7 @@ PI_THREAD (thread_explora_teclado_PC) {
 
 			switch(teclaPulsada) {
 
-				case 'a':
+				case 'd':
 					piLock(SYSTEM_FLAGS_KEY);
 					flags_player |= FLAG_START_DISPARO;
 					printf("Tecla A pulsada!\n");
@@ -105,10 +106,9 @@ PI_THREAD (thread_explora_teclado_PC) {
 					piUnlock(SYSTEM_FLAGS_KEY);
 					break;
 
-				case 's':
+				case 'i':
 					piLock(SYSTEM_FLAGS_KEY);
-					flags_player |= FLAG_NOTA_TIMEOUT;
-					flags_player |= FLAG_START_DISPARO;
+					flags_player |= FLAG_START_IMPACTO;
 					printf("Tecla S pulsada!\n");
 					fflush(stdout);
 					piUnlock(SYSTEM_FLAGS_KEY);
