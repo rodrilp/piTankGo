@@ -51,14 +51,19 @@ void InicializaTorreta (TipoTorreta *p_torreta) {
 
 	pinMode(SERVO_VERTICAL_PIN, OUTPUT);
 	softPwmCreate (SERVO_VERTICAL_PIN, p_torreta->servo_x.inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
-	//softPwmWrite(SERVO_VERTICAL_PIN, p_torreta->posicion.x);
 
 	pinMode(SERVO_HORIZONTAL_PIN, OUTPUT);
 	softPwmCreate (SERVO_HORIZONTAL_PIN, p_torreta->servo_y.inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
-	//softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta->posicion.y);
 
-	pinMode (IR_TX_PIN,OUTPUT);
-	softPwmCreate (IR_TX_PIN,0);
+	pinMode (IR_TX_PIN, OUTPUT);
+	digitalWrite(IR_TX_PIN,LOW);
+
+	pinMode (IR_RX_PIN, INPUT);
+	pullUpDnControl(IR_RX_PIN, PUD_DOWN);
+	wiringPiISR (IR_RX_PIN, INT_EDGE_RISING, impacto_isr);
+
+
+	p_torreta->timerDisparo = tmr_new(timer_duracion_disparo_isr);
 }
 
 //------------------------------------------------------
@@ -229,7 +234,7 @@ void DisparoIR (fsm_t* this) {
 	printf("[POSICION DE LA TORRETA]=[%d, %d]\n", p_torreta->posicion.x, p_torreta->posicion.y);
 	fflush(stdout);
 
-	softPwmWrite(IR_TX_PIN,1);
+	digitalWrite(IR_TX_PIN,HIGH);
 	printf("DISPARO IR");
 	fflush(stdout);
 
@@ -238,19 +243,45 @@ void DisparoIR (fsm_t* this) {
 	piUnlock(PLAYER_FLAGS_KEY);
 
 
+	tmr_startms(p_torreta->timerDisparo,SHOOTING_PERIOD);
 }
 
 void FinalDisparoIR (fsm_t* this) {
+
+	flags_juego &= (~FLAG_SHOOT_TIMEOUT);
+
+	digitalWrite(IR_TX_PIN, LOW);
+
 	printf("FIN DISPARO IR");
 	fflush(stdout);
 }
 
 void ImpactoDetectado (fsm_t* this) {
+
+	flags_juego &= (~FLAG_TARGET_DONE);
+
 	printf("IMPACTO DETECTADO");
 	fflush(stdout);
+
+	piLock(PLAYER_FLAGS_KEY);
+	flags_player |= FLAG_START_IMPACTO;
+	piUnlock(PLAYER_FLAGS_KEY);
+
 }
 
 void FinalizaJuego (fsm_t* this) {
 	printf("FIN DEL JUEGO");
 	fflush(stdout);
+}
+
+void timer_duracion_disparo_isr (union sigval value){
+	piLock(SYSTEM_FLAGS_KEY);
+	flags_juego |= FLAG_SHOOT_TIMEOUT;
+	piUnlock(SYSTEM_FLAGS_KEY);
+}
+
+void impacto_isr(void){
+	piLock(SYSTEM_FLAGS_KEY);
+	flags_juego |= FLAG_TARGET_DONE;
+	piUnlock(SYSTEM_FLAGS_KEY);
 }

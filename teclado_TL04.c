@@ -262,6 +262,14 @@ void process_key (fsm_t* this) {
 				fflush(stdout);
 				piUnlock(SYSTEM_FLAGS_KEY);
 				break;
+			case 'F':
+				piLock(SYSTEM_FLAGS_KEY);
+				flags_juego |= FLAG_SYSTEM_END;
+				printf("Tecla F pulsada!\n");
+				fflush(stdout);
+				piUnlock(SYSTEM_FLAGS_KEY);
+				exit(0);
+				break;
 			}
 			break;
 

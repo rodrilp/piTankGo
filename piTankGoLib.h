@@ -13,7 +13,7 @@
 // INTERVALO DE GUARDA ANTI-REBOTES
 #define	DEBOUNCE_TIME	150
 // DURACION DISPARO IR
-#define SHOOTING_PERIOD 0
+#define SHOOTING_PERIOD 2000
 
 // CLAVES PARA MUTEX
 // ATENCION: Valores a modificar por el alumno
@@ -42,7 +42,7 @@
 // Distribucion de pines GPIO empleada para el enlace IR
 // ATENCION: Valores a modificar por el alumno
 #define	IR_TX_PIN		24
-#define	IR_RX_PIN		0
+#define	IR_RX_PIN		25
 
 // Distribucion de pines GPIO empleada para la reproducción de efectos
 // ATENCION: Valores a modificar por el alumno

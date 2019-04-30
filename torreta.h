@@ -44,6 +44,7 @@ typedef struct {
 	TipoServo servo_x;
 	TipoServo servo_y;
 
+	tmr_t* timerDisparo;
 
 	//int inicio; // Valor correspondiente a la posicion inicial del servo
 	//int incremento; // Cuantía en que se incrementa el valor de la posicion con cada movimiento del servo
@@ -82,6 +83,7 @@ void ImpactoDetectado (fsm_t* this);
 void FinalizaJuego (fsm_t* this);
 
 // Prototipos de procedimientos de atencion a las interrupciones
-//static void timer_duracion_disparo_isr (union sigval value);
+void timer_duracion_disparo_isr (union sigval value);
+void impacto_isr(void);
 
 #endif /* _TORRETA_H_ */
