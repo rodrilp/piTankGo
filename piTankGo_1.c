@@ -57,7 +57,7 @@ int ConfiguraSistema (TipoSistema *p_sistema) {
 int InicializaSistema (TipoSistema *p_sistema) {
 	int result = 0;
 
-	InicializaPlayer(&(p_sistema->player);
+	InicializaPlayer(&(p_sistema->player));
 
 	// Lanzamos thread para exploracion del teclado convencional del PC
 //	result = piThreadCreate (thread_explora_teclado_PC);

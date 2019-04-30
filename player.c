@@ -47,7 +47,7 @@ int InicializaEfecto (TipoEfecto *p_efecto, char *nombre, int *array_frecuencias
 // Nota: parte inicialización común a InicializaPlayDisparo y InicializaPlayImpacto
 void InicializaPlayer (TipoPlayer *p_player) {
 
-	InicializaEfecto(&(p_player->efecto_disparo),"Disparo", frecuenciaDespacito, tiempoDespacito,160);
+	InicializaEfecto(&(p_player->efecto_disparo),"Disparo", frecuenciaGOT, tiempoGOT,518);
 	InicializaEfecto(&(p_player->efecto_impacto),"Impacto", frecuenciasImpacto, tiemposImpacto,32);
 
 	p_player->p_efecto = &(p_player->efecto_disparo);
@@ -165,7 +165,13 @@ void InicializaPlayImpacto (fsm_t* this) {
 	piUnlock (STD_IO_BUFFER_KEY);
 
 	p_player->p_efecto = & (p_player->efecto_impacto);
-	InicializaPlayer(p_player);
+
+	p_player->posicion_nota_actual=0;
+	p_player->frecuencia_nota_actual = p_player->p_efecto->frecuencias[p_player->posicion_nota_actual];
+	p_player->duracion_nota_actual = p_player->p_efecto->duraciones[p_player->posicion_nota_actual];
+
+
+
 	softToneWrite(PLAYER_PWM_PIN, p_player->frecuencia_nota_actual);
 	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
 
