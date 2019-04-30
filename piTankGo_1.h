@@ -13,7 +13,6 @@
 #include <wiringPi.h>
 #include <softTone.h>
 
-
 #include "kbhit.h" // Para poder detectar teclas pulsadas sin bloqueo y leer las teclas pulsadas
 #include "player.h"
 #include "torreta.h"
@@ -35,7 +34,7 @@ enum fsm_state {
 
 
 typedef struct {
-	TipoTorreta torreta; // Objeto para el control de la torreta
+	//TipoTorreta torreta; // Objeto para el control de la torreta
 	TipoPlayer player; // Reproductor de efectos
 	char teclaPulsada;  // Variable que almacena la ultima tecla pulsada
 	int debug; // Variable que habilita o deshabilita la impresion de mensajes por salida estandar
