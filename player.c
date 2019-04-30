@@ -61,7 +61,7 @@ void InicializaPlayer (TipoPlayer *p_player) {
 	piUnlock(STD_IO_BUFFER_KEY);
 
 	pinMode(PLAYER_PWM_PIN, OUTPUT);
-	//softPwmCreate(PLAYER_PWM_PIN);
+	softToneCreate(PLAYER_PWM_PIN);
 	digitalWrite(PLAYER_PWM_PIN,0);
 
 	p_player->timer = tmr_new(timer_player_duracion_nota_actual_isr);

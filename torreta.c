@@ -261,7 +261,7 @@ void DisparoIR (fsm_t* this) {
 	digitalWrite(IR_TX_PIN,HIGH);
 
 	piLock (STD_IO_BUFFER_KEY);
-	printf("DISPARO IR");
+	printf("DISPARO IR ");
 	fflush(stdout);
 	piUnlock (STD_IO_BUFFER_KEY);
 
