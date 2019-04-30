@@ -20,7 +20,7 @@
 #define MAX_NUM_NOTAS 		2000
 #define MAX_NUM_CHAR_NOMBRE	100
 
-#define CLK_MS 10
+//#define CLK_MS 10
 #define TIMEOUT 2000
 
 typedef struct {

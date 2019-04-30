@@ -16,6 +16,8 @@
 #include "kbhit.h" // Para poder detectar teclas pulsadas sin bloqueo y leer las teclas pulsadas
 #include "player.h"
 #include "torreta.h"
+#include "teclado_TL04.h"
+#include "teclado_TL04.c"
 
 // Posibles estados de las FSMs
 enum fsm_state {
@@ -45,10 +47,11 @@ typedef struct {
 //------------------------------------------------------
 int ConfiguraSistema (TipoSistema *p_sistema);
 int InicializaSistema (TipoSistema *p_sistema);
+int initialize(TipoTeclado *p_teclado);
 
 //------------------------------------------------------
 // FUNCIONES LIGADAS A THREADS ADICIONALES
 //------------------------------------------------------
-PI_THREAD(thread_explora_teclado_PC);
+//PI_THREAD(thread_explora_teclado_PC);
 
 #endif /* _PITANKGO_1_H_ */

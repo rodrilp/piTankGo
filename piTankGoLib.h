@@ -7,12 +7,12 @@
 #include "fsm.h"
 #include "tmr.h"
 
-#define CLK_MS 10
+#define CLK_MS 5
 #define PIN 19
 
 // ATENCION: Valores a modificar por el alumno
 // INTERVALO DE GUARDA ANTI-REBOTES
-#define	DEBOUNCE_TIME	0
+	//#define	DEBOUNCE_TIME	200
 // DURACION DISPARO IR
 #define SHOOTING_PERIOD 0
 
