@@ -59,13 +59,6 @@ int InicializaSistema (TipoSistema *p_sistema) {
 
 	InicializaPlayer(&(p_sistema->player));
 
-	// Lanzamos thread para exploracion del teclado convencional del PC
-//	result = piThreadCreate (thread_explora_teclado_PC);
-//
-//	if (result != 0) {
-//		printf ("Thread didn't start!!!\n");
-//		return -1;
-//	}
 	return result;
 }
 
@@ -130,15 +123,6 @@ int main (){
 	unsigned int next;
 	TipoSistema sistema;
 
-
-
-
-	//AQUI NO SE QUE PONER
-
-	//sistema.player.timer  = tmr_new (timer_player_duracion_nota_actual_isr);
-	//p_player.timer = tmr_new(timer_player_duracion_nota_actual_isr);
-	//tmr_t* tmr = tmr_new (timer_player_duracion_nota_actual_isr);
-
 	// Configuracion e inicializacion del sistema
 	ConfiguraSistema (&sistema);
 	InicializaSistema (&sistema);
@@ -184,7 +168,7 @@ int main (){
 
 
 	fsm_trans_t juego[] = {
-		{ WAIT_START, CompruebaComienzo, WAIT_NEXT, ComienzaSistema },
+		{ WAIT_START, CompruebaComienzo, WAIT_MOVE, ComienzaSistema },
 		{ WAIT_MOVE, CompruebaJoystickUp, WAIT_MOVE, MueveTorretaArriba },
 		{ WAIT_MOVE,CompruebaJoystickLeft , WAIT_MOVE, MueveTorretaIzquierda },
 		{ WAIT_MOVE, CompruebaJoystickRight, WAIT_MOVE, MueveTorretaDerecha },
@@ -201,7 +185,7 @@ int main (){
 	fsm_t* servo_fsm = fsm_new (WAIT_KEY, servo_basico, &(sistema.torreta));
 	fsm_t* player_fsm = fsm_new (WAIT_START, reproductor, &(sistema.player));
 	fsm_t* torreta_fsm = fsm_new (WAIT_START, juego, &(sistema.torreta));
-	
+
 
 
 	next = millis();

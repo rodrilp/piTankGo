@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <wiringPi.h>
 #include <softPwm.h>
+#include <softTone.h>
 
 #include "piTankGoLib.h"
 

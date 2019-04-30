@@ -136,6 +136,7 @@ void InicializaPlayDisparo (fsm_t* this) {
 	flags_player &= ~FLAG_START_DISPARO;
 	piUnlock (PLAYER_FLAGS_KEY);
 
+
 	piLock (STD_IO_BUFFER_KEY);
 	printf("Inicia Disparo\n");
 	fflush(stdout);

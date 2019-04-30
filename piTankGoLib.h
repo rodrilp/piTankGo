@@ -41,7 +41,7 @@
 
 // Distribucion de pines GPIO empleada para el enlace IR
 // ATENCION: Valores a modificar por el alumno
-#define	IR_TX_PIN		0
+#define	IR_TX_PIN		24
 #define	IR_RX_PIN		0
 
 // Distribucion de pines GPIO empleada para la reproducción de efectos

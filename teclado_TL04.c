@@ -208,11 +208,11 @@ void process_key (fsm_t* this) {
 			switch(tecladoTL04[p_teclado->teclaPulsada.row][p_teclado->teclaPulsada.col]){
 
 			case'D':
-				piLock(PLAYER_FLAGS_KEY);
-				flags_player |= FLAG_START_DISPARO;
+				piLock(SYSTEM_FLAGS_KEY);
+				flags_juego |= FLAG_TRIGGER_BUTTON;
 				printf("Tecla D pulsada!\n");
 				fflush(stdout);
-				piUnlock(PLAYER_FLAGS_KEY);
+				piUnlock(SYSTEM_FLAGS_KEY);
 				break;
 
 			case '1':

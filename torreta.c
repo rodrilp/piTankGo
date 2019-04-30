@@ -57,6 +57,8 @@ void InicializaTorreta (TipoTorreta *p_torreta) {
 	softPwmCreate (SERVO_HORIZONTAL_PIN, p_torreta->servo_y.inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
 	//softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta->posicion.y);
 
+	pinMode (IR_TX_PIN,OUTPUT);
+	softPwmCreate (IR_TX_PIN,0);
 }
 
 //------------------------------------------------------
@@ -150,15 +152,12 @@ int CompruebaFinalJuego (fsm_t* this) {
 void ComienzaSistema (fsm_t* this) {
 	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
 
-
 	flags_juego &= (~FLAG_SYSTEM_START);
 
 	InicializaTorreta (p_torreta);
 
 	printf("Comienza el juego");
 	fflush(stdout);
-
-
 }
 
 void MueveTorretaArriba (fsm_t* this) {
@@ -223,8 +222,22 @@ void MueveTorretaDerecha (fsm_t* this) {
 }
 
 void DisparoIR (fsm_t* this) {
+	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
+
+	flags_juego &= (~FLAG_TRIGGER_BUTTON);
+
+	printf("[POSICION DE LA TORRETA]=[%d, %d]\n", p_torreta->posicion.x, p_torreta->posicion.y);
+	fflush(stdout);
+
+	softPwmWrite(IR_TX_PIN,1);
 	printf("DISPARO IR");
 	fflush(stdout);
+
+	piLock(PLAYER_FLAGS_KEY);
+	flags_player |= FLAG_START_DISPARO;
+	piUnlock(PLAYER_FLAGS_KEY);
+
+
 }
 
 void FinalDisparoIR (fsm_t* this) {
