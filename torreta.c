@@ -9,36 +9,53 @@
 
 void InicializaTorreta (TipoTorreta *p_torreta) {
 
-	flags_juego = 1;
+	//flags_juego = 1;
+	p_torreta->servo_x.incremento = SERVO_INCREMENTO;
+	p_torreta->servo_x.minimo 	= SERVO_MINIMO;
+	p_torreta->servo_x.maximo 	= SERVO_MAXIMO;
+
+	p_torreta->servo_x.inicio 	= SERVO_MINIMO + (SERVO_MAXIMO - SERVO_MINIMO)/2;
+	p_torreta->posicion.x	= p_torreta->servo_x.inicio;
 
 
-	wiringPiSetupGpio();
-
-	p_torreta->incremento = SERVO_INCREMENTO;
-	p_torreta->minimo 	= SERVO_MINIMO;
-	p_torreta->maximo 	= SERVO_MAXIMO;
-
-	p_torreta->inicio 	= SERVO_MINIMO + (SERVO_MAXIMO - SERVO_MINIMO)/2;
-	p_torreta->posicion.x 	= p_torreta->inicio;
-	p_torreta->posicion.y 	= p_torreta->inicio;
-
-	if((p_torreta->posicion.x > p_torreta->maximo) || (p_torreta->posicion.y > p_torreta->maximo)){
-		p_torreta->posicion.x = p_torreta->maximo;
-		p_torreta->posicion.y = p_torreta->maximo;
+	if(p_torreta->posicion.x > p_torreta->servo_x.maximo) {
+		p_torreta->posicion.x = p_torreta->servo_x.maximo;
 	}
 
-	if((p_torreta->posicion.x < p_torreta->minimo) || (p_torreta->posicion.y > p_torreta->minimo)){
-		p_torreta->posicion.x = p_torreta->minimo;
-		p_torreta->posicion.y = p_torreta->minimo;
+	if(p_torreta->posicion.x < p_torreta->servo_x.minimo){
+		p_torreta->posicion.x = p_torreta->servo_x.minimo;
 	}
+
+
+	p_torreta->servo_y.incremento = SERVO_INCREMENTO;
+	p_torreta->servo_y.minimo 	= SERVO_MINIMO;
+	p_torreta->servo_y.maximo 	= SERVO_MAXIMO;
+
+	p_torreta->servo_y.inicio 	= SERVO_MINIMO + (SERVO_MAXIMO - SERVO_MINIMO)/2;
+	p_torreta->posicion.y = p_torreta->servo_y.inicio;
+
+	if(p_torreta->posicion.y > p_torreta->servo_y.maximo){
+		p_torreta->posicion.y = p_torreta->servo_y.maximo;
+	}
+
+	if(p_torreta->posicion.y < p_torreta->servo_y.minimo){
+		p_torreta->posicion.y = p_torreta->servo_y.minimo;
+	}
+
+	printf("[POSICION INICIO x]=[%d]\n", p_torreta->servo_x.inicio);
+	printf("[POSICION INICIO y]=[%d]\n", p_torreta->servo_y.inicio);
+	printf("[POSICION x]=[%d]\n", p_torreta->posicion.x);
+	printf("[POSICION y]=[%d]\n", p_torreta->posicion.y);
+	fflush(stdout);
+
 
 	pinMode(SERVO_VERTICAL_PIN, OUTPUT);
-	softPwmCreate (SERVO_VERTICAL_PIN, p_torreta->inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
-	softPwmWrite(SERVO_VERTICAL_PIN, p_torreta->posicion.y);
+	softPwmCreate (SERVO_VERTICAL_PIN, p_torreta->servo_x.inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
+	//softPwmWrite(SERVO_VERTICAL_PIN, p_torreta->posicion.x);
 
 	pinMode(SERVO_HORIZONTAL_PIN, OUTPUT);
-	softPwmCreate (SERVO_HORIZONTAL_PIN, p_torreta->inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
-	softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta->posicion.x);
+	softPwmCreate (SERVO_HORIZONTAL_PIN, p_torreta->servo_y.inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
+	//softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta->posicion.y);
 
 }
 
@@ -133,7 +150,8 @@ int CompruebaFinalJuego (fsm_t* this) {
 void ComienzaSistema (fsm_t* this) {
 	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
 
-	flags_juego =0;
+
+	flags_juego &= (~FLAG_SYSTEM_START);
 
 	InicializaTorreta (p_torreta);
 
@@ -148,12 +166,12 @@ void MueveTorretaArriba (fsm_t* this) {
 
 	flags_juego &= (~FLAG_JOYSTICK_UP);
 
-	if(p_torreta->posicion.y + p_torreta->incremento <= p_torreta->maximo){
-		p_torreta-> posicion.y = p_torreta->posicion.y + p_torreta->incremento;
+	if(p_torreta->posicion.y + p_torreta->servo_y.incremento <= p_torreta->servo_y.maximo){
+		p_torreta->posicion.y = p_torreta->posicion.y + p_torreta->servo_y.incremento;
 
-		softPwmWrite(SERVO_VERTICAL_PIN, p_torreta-> posicion.y);
+		softPwmWrite(SERVO_VERTICAL_PIN, p_torreta->posicion.y);
 
-		printf("[SERVO][POSICION]=[%d]\n", p_torreta->posicion.y);
+		printf("[SERVO ARRIBA][POSICION]=[%d]\n", p_torreta->posicion.y);
 		fflush(stdout);
 	}
 
@@ -164,12 +182,12 @@ void MueveTorretaAbajo (fsm_t* this) {
 
 	flags_juego &= (~FLAG_JOYSTICK_DOWN);
 
-	if(p_torreta->posicion.y - p_torreta->incremento >= p_torreta->minimo){
-		p_torreta-> posicion.y = p_torreta->posicion.y - p_torreta->incremento;
+	if(p_torreta->posicion.y - p_torreta->servo_y.incremento >= p_torreta->servo_x.minimo){
+		p_torreta-> posicion.y = p_torreta->posicion.y - p_torreta->servo_y.incremento;
 
-		softPwmWrite(SERVO_VERTICAL_PIN, p_torreta-> posicion.y);
+		softPwmWrite(SERVO_VERTICAL_PIN, p_torreta->posicion.y);
 
-		printf("[SERVO][POSICION]=[%d]\n", p_torreta->posicion.y);
+		printf("[SERVO ABAJO][POSICION]=[%d]\n", p_torreta->posicion.y);
 		fflush(stdout);
 	}
 }
@@ -179,12 +197,12 @@ void MueveTorretaIzquierda (fsm_t* this) {
 
 	flags_juego &= (~FLAG_JOYSTICK_LEFT);
 
-	if(p_torreta->posicion.x + p_torreta->incremento <= p_torreta->maximo){
-		p_torreta-> posicion.x = p_torreta->posicion.x + p_torreta->incremento;
+	if(p_torreta->posicion.x + p_torreta->servo_x.incremento <= p_torreta->servo_x.maximo){
+		p_torreta->posicion.x = p_torreta->posicion.x + p_torreta->servo_x.incremento;
 
-		softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta-> posicion.x);
+		softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta->posicion.x);
 
-		printf("[SERVO][POSICION]=[%d]\n", p_torreta->posicion.x);
+		printf("[SERVO IZQUIERDA][POSICION]=[%d]\n", p_torreta->posicion.x);
 		fflush(stdout);
 	}
 }
@@ -194,22 +212,17 @@ void MueveTorretaDerecha (fsm_t* this) {
 
 	flags_juego &= (~FLAG_JOYSTICK_RIGHT);
 
-	if(p_torreta->posicion.x + p_torreta->incremento <= p_torreta->maximo){
-		p_torreta-> posicion.x = p_torreta->posicion.x + p_torreta->incremento;
+	if(p_torreta->posicion.x - p_torreta->servo_x.incremento >= p_torreta->servo_x.minimo){
+		p_torreta-> posicion.x = p_torreta->posicion.x - p_torreta->servo_x.incremento;
 
-		softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta-> posicion.x);
+		softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta->posicion.x);
 
-		printf("[SERVO][POSICION]=[%d]\n", p_torreta->posicion.x);
+		printf("[SERVO DERECHA][POSICION]=[%d]\n", p_torreta->posicion.x);
 		fflush(stdout);
 	}
 }
 
 void DisparoIR (fsm_t* this) {
-
-	//piLock(PLAYER_FLAGS_KEY);
-	//flags_player |= FLAG_START_DISPARO;
-	//piUnlock(PLAYER_FLAGS_KEY);
-
 	printf("DISPARO IR");
 	fflush(stdout);
 }

@@ -57,11 +57,7 @@ int ConfiguraSistema (TipoSistema *p_sistema) {
 int InicializaSistema (TipoSistema *p_sistema) {
 	int result = 0;
 
-	InicializaEfecto(&(p_sistema->player.efecto_disparo),"Disparo", frecuenciaDespacito, tiempoDespacito,160);
-	InicializaEfecto(&(p_sistema->player.efecto_impacto),"Impacto", frecuenciasImpacto, tiemposImpacto,32);
-
-	p_sistema->player.p_efecto = &(p_sistema->player.efecto_disparo);
-
+	InicializaPlayer(&(p_sistema->player);
 
 	// Lanzamos thread para exploracion del teclado convencional del PC
 //	result = piThreadCreate (thread_explora_teclado_PC);
@@ -134,7 +130,6 @@ int main (){
 	unsigned int next;
 	TipoSistema sistema;
 
-	TipoTorreta torreta;
 
 
 
@@ -203,7 +198,7 @@ int main (){
 
 	fsm_t* columns_fsm = fsm_new (KEY_COL_1, columns, &teclado);
 	fsm_t* keypad_fsm = fsm_new (KEY_WAITING, keypad, &teclado);
-	fsm_t* servo_fsm = fsm_new (WAIT_KEY, servo_basico, &torreta);
+	fsm_t* servo_fsm = fsm_new (WAIT_KEY, servo_basico, &(sistema.torreta));
 	fsm_t* player_fsm = fsm_new (WAIT_START, reproductor, &(sistema.player));
 	fsm_t* torreta_fsm = fsm_new (WAIT_START, juego, &(sistema.torreta));
 	
