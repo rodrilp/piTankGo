@@ -7,32 +7,31 @@
 #include "fsm.h"
 #include "tmr.h"
 
-//#define CLK_MS 10
-#define PIN 19
+#define CLK_MS 10
 
 // ATENCION: Valores a modificar por el alumno
 // INTERVALO DE GUARDA ANTI-REBOTES
-//#define	DEBOUNCE_TIME	0
+#define	DEBOUNCE_TIME	150
 // DURACION DISPARO IR
 #define SHOOTING_PERIOD 0
 
 // CLAVES PARA MUTEX
 // ATENCION: Valores a modificar por el alumno
-#define	SYSTEM_FLAGS_KEY	0
-#define	PLAYER_FLAGS_KEY	1
-#define	STD_IO_BUFFER_KEY	2
+#define	SYSTEM_FLAGS_KEY	1
+#define	PLAYER_FLAGS_KEY	2
+#define	STD_IO_BUFFER_KEY	3
 
 // Distribucion de pines GPIO empleada para el teclado
 // ATENCION: Valores a modificar por el alumno
-#define	TECLADO_ROW_1	0
-#define	TECLADO_ROW_2	0
-#define	TECLADO_ROW_3	0
-#define	TECLADO_ROW_4	0
-
-#define	TECLADO_COL_1	0
-#define	TECLADO_COL_2	0
-#define	TECLADO_COL_3	0
-#define	TECLADO_COL_4	0
+//#define	TECLADO_ROW_1	0
+//#define	TECLADO_ROW_2	0
+//#define	TECLADO_ROW_3	0
+//#define	TECLADO_ROW_4	0
+//
+//#define	TECLADO_COL_1	0
+//#define	TECLADO_COL_2	0
+//#define	TECLADO_COL_3	0
+//#define	TECLADO_COL_4	0
 
 //#define JOY_PIN_UP	0
 //#define JOY_PIN_DOWN	0
@@ -47,7 +46,7 @@
 
 // Distribucion de pines GPIO empleada para la reproducción de efectos
 // ATENCION: Valores a modificar por el alumno
-#define PLAYER_PWM_PIN 	0
+#define PLAYER_PWM_PIN 	11
 
 // Distribucion de pines GPIO empleada para el control de los servos
 // ATENCION: Valores a modificar por el alumno

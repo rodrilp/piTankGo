@@ -1,9 +1,9 @@
 
 #include "player.h"
 #include <string.h>
-//#include "tmr.h"
-//#include <pthread.h>
-//#include <softTone.h>
+#include <wiringPi.h>
+#include <softTone.h>
+
 
 
 //------------------------------------------------------
@@ -139,7 +139,8 @@ void InicializaPlayDisparo (fsm_t* this) {
 
 
 	p_player->p_efecto = & (p_player->efecto_disparo);
-	//InicializaPlayer(p_player);
+	InicializaPlayer(p_player);
+	softToneWrite(PLAYER_PWM_PIN, p_player->frecuencia_nota_actual);
 	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
 
 }
@@ -157,7 +158,8 @@ void InicializaPlayImpacto (fsm_t* this) {
 	piUnlock (STD_IO_BUFFER_KEY);
 
 	p_player->p_efecto = & (p_player->efecto_impacto);
-	//InicializaPlayer(p_player);
+	InicializaPlayer(p_player);
+	softToneWrite(PLAYER_PWM_PIN, p_player->frecuencia_nota_actual);
 	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
 
 
@@ -171,16 +173,19 @@ void ComienzaNuevaNota (fsm_t* this) {
 	flags_player &= ~FLAG_PLAYER_END;
 	piUnlock (PLAYER_FLAGS_KEY);
 
+	softToneWrite(PLAYER_PWM_PIN, p_player->frecuencia_nota_actual);
+	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
+
+
 	piLock (STD_IO_BUFFER_KEY);
 	printf("[Player][ComienzaNuevaNota][NOTA %d] [FREC %d] [DURA %d]\n",p_player->posicion_nota_actual +1, p_player->frecuencia_nota_actual, p_player->duracion_nota_actual);
+	fflush(stdout);
 	piUnlock (STD_IO_BUFFER_KEY);
 
-	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
 }
 
 void ActualizaPlayer (fsm_t* this) {
-	TipoPlayer *p_player;
-	p_player = (TipoPlayer*)this->user_data;
+	TipoPlayer *p_player = (TipoPlayer*)this->user_data;
 
 	piLock (PLAYER_FLAGS_KEY);
 	flags_player &= ~FLAG_NOTA_TIMEOUT;
@@ -188,16 +193,12 @@ void ActualizaPlayer (fsm_t* this) {
 
 	piLock (STD_IO_BUFFER_KEY);
 	if(p_player->posicion_nota_actual >= (p_player->p_efecto->num_notas -1 )){
-		printf("SE HAN REPRODUCIDO TODAS LAS NOTAS\n");
-		fflush(stdout);
 
 		piLock (PLAYER_FLAGS_KEY);
 		flags_player |= FLAG_PLAYER_END;
 		piUnlock (PLAYER_FLAGS_KEY);
 
 	}else{
-
-		//tmr_startms((tmr_t*)(p_player->timer), p_player->duracion_nota_actual);
 
 		p_player->posicion_nota_actual++;
 		printf("[Player][ActualizaPlayer][NUEVA NOTA (%d DE %d)]\n", p_player ->posicion_nota_actual+1, (p_player->p_efecto->num_notas ));
@@ -219,8 +220,12 @@ void FinalEfecto (fsm_t* this) {
 	flags_player &= ~FLAG_START_DISPARO;
 	piUnlock (PLAYER_FLAGS_KEY);
 
+	softToneWrite(PLAYER_PWM_PIN,0);
+
 	piLock (STD_IO_BUFFER_KEY);
+	printf("SE HAN REPRODUCIDO TODAS LAS NOTAS\n");
 	printf("Final Efecto\n");
+	fflush(stdout);
 	piUnlock (STD_IO_BUFFER_KEY);
 }
 

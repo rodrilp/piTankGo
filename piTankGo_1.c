@@ -1,7 +1,6 @@
 
 #include "piTankGo_1.h"
-#include <softTone.h>
-#include "piTankGoLib.h"
+#include "teclado_TL04.h"
 
 
 
@@ -35,24 +34,17 @@ int flags_player = 0;
 // configurar las interrupciones periódicas y sus correspondientes temporizadores,
 // crear, si fuese necesario, los threads adicionales que pueda requerir el sistema
 
-volatile int flags=0;
+//volatile int flags=0;
 
 int ConfiguraSistema (TipoSistema *p_sistema) {
 	int result = 0;
 
-	piLock(STD_IO_BUFFER_KEY);
+	wiringPiSetupGpio();
 
-	if(wiringPiSetupGpio () < 0){
-		printf("Unable to setup wiringPi\n");
+	pinMode(PLAYER_PWM_PIN, OUTPUT);
+	softToneCreate(PLAYER_PWM_PIN);
+	digitalWrite(PLAYER_PWM_PIN,0);
 
-		return -1;
-	}
-
-	if(softToneCreate(PIN) != 0){
-		return -1;
-	}
-
-	piUnlock(STD_IO_BUFFER_KEY);
 	return result;
 }
 
@@ -65,21 +57,19 @@ int ConfiguraSistema (TipoSistema *p_sistema) {
 int InicializaSistema (TipoSistema *p_sistema) {
 	int result = 0;
 
-	InicializaEfecto(&(p_sistema->player.efecto_disparo),"Disparo", frecuenciasDisparo, tiemposDisparo,16);
+	InicializaEfecto(&(p_sistema->player.efecto_disparo),"Disparo", frecuenciaDespacito, tiempoDespacito,160);
 	InicializaEfecto(&(p_sistema->player.efecto_impacto),"Impacto", frecuenciasImpacto, tiemposImpacto,32);
 
-	//p_sistema->player.p_efecto = &(p_sistema->player.efecto_disparo);
-	InicializaPlayer(&(p_sistema->player));
-	initialize(&teclado);
+	p_sistema->player.p_efecto = &(p_sistema->player.efecto_disparo);
+
 
 	// Lanzamos thread para exploracion del teclado convencional del PC
-	/*result = piThreadCreate (thread_explora_teclado_PC);
-
-	if (result != 0) {
-		printf ("Thread didn't start!!!\n");
-		return -1;
-	}
-	*/
+//	result = piThreadCreate (thread_explora_teclado_PC);
+//
+//	if (result != 0) {
+//		printf ("Thread didn't start!!!\n");
+//		return -1;
+//	}
 	return result;
 }
 
@@ -87,7 +77,7 @@ int InicializaSistema (TipoSistema *p_sistema) {
 // SUBRUTINAS DE ATENCION A LAS INTERRUPCIONES
 //------------------------------------------------------
 
-/*PI_THREAD (thread_explora_teclado_PC) {
+PI_THREAD (thread_explora_teclado_PC) {
 	int teclaPulsada;
 
 	while(1) {
@@ -131,14 +121,20 @@ int InicializaSistema (TipoSistema *p_sistema) {
 		piUnlock (STD_IO_BUFFER_KEY);
 	}
 }
-*/
+
 
 // wait until next_activation (absolute time)
-void delay_until (unsigned int next) {
-	unsigned int now = millis();
-	if (next > now) {
-		delay (next - now);
-	}
+//void delay_until (unsigned int next) {
+//	unsigned int now = millis();
+//	if (next > now) {
+//		delay (next - now);
+//	}
+//}
+
+void fsm_setup(fsm_t* luz_fsm){
+	piLock(PLAYER_FLAGS_KEY);
+	flags_player = 0;
+	piUnlock(PLAYER_FLAGS_KEY);
 }
 
 int main (){
@@ -146,6 +142,13 @@ int main (){
 	TipoSistema sistema;
 	//TipoPlayer p_player;
 
+
+
+	//AQUI NO SE QUE PONER
+
+	//sistema.player.timer  = tmr_new (timer_player_duracion_nota_actual_isr);
+	//p_player.timer = tmr_new(timer_player_duracion_nota_actual_isr);
+	//tmr_t* tmr = tmr_new (timer_player_duracion_nota_actual_isr);
 
 	// Configuracion e inicializacion del sistema
 	ConfiguraSistema (&sistema);
@@ -161,6 +164,10 @@ int main (){
 		{-1, NULL, -1, NULL },
 	};
 
+	fsm_t* player_fsm = fsm_new (WAIT_START, reproductor, &(sistema.player));
+	fsm_setup(player_fsm);
+	initialize(&teclado);
+
 	fsm_trans_t columns[] = {
 		{ KEY_COL_1, CompruebaColumnTimeout, KEY_COL_2, col_2 },
 		{ KEY_COL_2, CompruebaColumnTimeout, KEY_COL_3, col_3 },
@@ -174,26 +181,20 @@ int main (){
 		{-1, NULL, -1, NULL },
 	};
 
-	//initialize(&teclado);
-
-
-
-	fsm_t* player_fsm = fsm_new (WAIT_START, reproductor, &(sistema.player));
 	fsm_t* columns_fsm = fsm_new (KEY_COL_1, columns, &teclado);
 	fsm_t* keypad_fsm = fsm_new (KEY_WAITING, keypad, &teclado);
-
 
 	next = millis();
 	while (1) {
 		fsm_fire (player_fsm);
-		fsm_fire (columns_fsm);
-		fsm_fire (keypad_fsm);
+
+		fsm_fire(columns_fsm);
+		fsm_fire(keypad_fsm);
 
 		next += CLK_MS;
 		delay_until (next);
 	}
 
-	//tmr_destroy(p_player.timer);
-	//fsm_destroy (player_fsm);
+	fsm_destroy (player_fsm);
 	return 0;
 }

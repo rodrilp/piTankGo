@@ -1,8 +1,11 @@
 #include "teclado_TL04.h"
+#include "piTankGo_1.h"
+#include "piTankGoLib.h"
 
-//static TipoTeclado teclado;
-static int flags = 0;
-int debounceTime[NUM_ROWS] = {DEBOUNCE_TIME, DEBOUNCE_TIME, DEBOUNCE_TIME, DEBOUNCE_TIME}; // Timeout to avoid bouncing after pin event
+
+TipoTeclado teclado;
+int flags = 0;
+int debounceTime[NUM_ROWS] = {0,0,0,0}; // Timeout to avoid bouncing after pin event
 
 char tecladoTL04[4][4] = {
 	{'1', '2', '3', 'C'},
@@ -193,36 +196,34 @@ void process_key (fsm_t* this) {
 
 	flags &= (~FLAG_KEY_PRESSED);
 
-	switch(tecladoTL04[p_teclado->teclaPulsada.row][p_teclado->teclaPulsada.col]){
-		//(p_teclado->teclaPulsada.col){
-	case '7':
-			piLock(SYSTEM_FLAGS_KEY);
-			flags_player |= FLAG_START_DISPARO;
-			printf("Tecla 7 pulsada!\n");
-			fflush(stdout);
-			piUnlock(SYSTEM_FLAGS_KEY);
-
-			p_teclado->teclaPulsada.row = -1;
-			p_teclado->teclaPulsada.col = -1;
-			break;
-
-		case 'A':
-			piLock(SYSTEM_FLAGS_KEY);
-			flags_player |= FLAG_START_IMPACTO;
-			printf("Tecla A pulsada!\n");
-			fflush(stdout);
-			piUnlock(SYSTEM_FLAGS_KEY);
-
-			p_teclado->teclaPulsada.row = -1;
-			p_teclado->teclaPulsada.col = -1;
-			break;
-
-		/*case COL_3:
+	switch(p_teclado->teclaPulsada.col){
+		case COL_1:
+		case COL_2:
+		case COL_3:
 		case COL_4:
 			printf("\nKeypress \"%c\"...\n",
 					tecladoTL04[p_teclado->teclaPulsada.row][p_teclado->teclaPulsada.col]);
 			fflush(stdout);
-			break;*/
+
+			switch(tecladoTL04[p_teclado->teclaPulsada.row][p_teclado->teclaPulsada.col]){
+
+			case'D':
+				piLock(PLAYER_FLAGS_KEY);
+				flags_player |= FLAG_START_DISPARO;
+				printf("Tecla D pulsada!\n");
+				fflush(stdout);
+				piUnlock(PLAYER_FLAGS_KEY);
+				break;
+
+			case '1':
+				piLock(PLAYER_FLAGS_KEY);
+				flags_player |= FLAG_START_IMPACTO;
+				printf("Tecla 1 pulsada!\n");
+				fflush(stdout);
+				piUnlock(PLAYER_FLAGS_KEY);
+				break;
+			}
+			break;
 
 		default:
 			printf("\nERROR!!!! invalid number of column (%d)!!!\n", p_teclado->teclaPulsada.col);
@@ -238,6 +239,13 @@ void process_key (fsm_t* this) {
 
 }
 
+// wait until next_activation (absolute time)
+void delay_until (unsigned int next) {
+	unsigned int now = millis();
+	if (next > now) {
+		delay (next - now);
+	}
+}
 
 void timer_duracion_columna_isr (union sigval value) {
 	piLock (FLAG_KEY);
@@ -295,4 +303,34 @@ int initialize(TipoTeclado *p_teclado) {
 	return 0;
 }
 
+/*int main () {
+	unsigned int next;
 
+	fsm_trans_t columns[] = {
+		{ KEY_COL_1, CompruebaColumnTimeout, KEY_COL_2, col_2 },
+		{ KEY_COL_2, CompruebaColumnTimeout, KEY_COL_3, col_3 },
+		{ KEY_COL_3, CompruebaColumnTimeout, KEY_COL_4, col_4 },
+		{ KEY_COL_4, CompruebaColumnTimeout, KEY_COL_1, col_1 },
+		{-1, NULL, -1, NULL },
+	};
+
+	fsm_trans_t keypad[] = {
+		{ KEY_WAITING, key_pressed, KEY_WAITING, process_key},
+		{-1, NULL, -1, NULL },
+	};
+
+	initialize(&teclado);
+
+	fsm_t* columns_fsm = fsm_new (KEY_COL_1, columns, &teclado);
+	fsm_t* keypad_fsm = fsm_new (KEY_WAITING, keypad, &teclado);
+
+	next = millis();
+	while (1) {
+		fsm_fire (columns_fsm);
+		fsm_fire (keypad_fsm);
+
+		next += CLK_MS;
+		delay_until (next);
+	}
+	return 0;
+}*/
