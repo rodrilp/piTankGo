@@ -21,7 +21,7 @@
 #define MAX_NUM_CHAR_NOMBRE	100
 
 //#define CLK_MS 10
-#define TIMEOUT 2000
+//#define TIMEOUT 2000
 
 typedef struct {
 	char nombre[MAX_NUM_CHAR_NOMBRE]; // String con el nombre del efecto

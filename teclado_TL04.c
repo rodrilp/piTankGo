@@ -1,9 +1,8 @@
 #include "teclado_TL04.h"
-//
 
-TipoTeclado teclado;
-volatile int flags = 0;
-int debounceTime[NUM_ROWS] = {0,0,0,0}; // Timeout to avoid bouncing after pin event
+//static TipoTeclado teclado;
+static int flags = 0;
+int debounceTime[NUM_ROWS] = {DEBOUNCE_TIME, DEBOUNCE_TIME, DEBOUNCE_TIME, DEBOUNCE_TIME}; // Timeout to avoid bouncing after pin event
 
 char tecladoTL04[4][4] = {
 	{'1', '2', '3', 'C'},
@@ -176,52 +175,124 @@ void col_4 (fsm_t* this) {
 	tmr_startms((tmr_t*)(p_teclado->tmr_duracion_columna), COL_REFRESH_TIME);
 }
 
+int key_pressed (fsm_t* this) {
+	int result = 0;
 
+	piLock (FLAG_KEY);
+	result = (flags & FLAG_KEY_PRESSED);
+	piUnlock (FLAG_KEY);
 
+	return result;
+}
 
+void process_key (fsm_t* this) {
+	TipoTeclado *p_teclado;
+	p_teclado = (TipoTeclado*)(this->user_data);
 
-// wait until next_activation (absolute time)
-/*
-void delay_until (unsigned int next) {
-	unsigned int now = millis();
-	if (next > now) {
-		delay (next - now);
+	piLock (FLAG_KEY);
+
+	flags &= (~FLAG_KEY_PRESSED);
+
+	switch(tecladoTL04[p_teclado->teclaPulsada.row][p_teclado->teclaPulsada.col]){
+		//(p_teclado->teclaPulsada.col){
+	case '7':
+			piLock(SYSTEM_FLAGS_KEY);
+			flags_player |= FLAG_START_DISPARO;
+			printf("Tecla 7 pulsada!\n");
+			fflush(stdout);
+			piUnlock(SYSTEM_FLAGS_KEY);
+
+			p_teclado->teclaPulsada.row = -1;
+			p_teclado->teclaPulsada.col = -1;
+			break;
+
+		case 'A':
+			piLock(SYSTEM_FLAGS_KEY);
+			flags_player |= FLAG_START_IMPACTO;
+			printf("Tecla A pulsada!\n");
+			fflush(stdout);
+			piUnlock(SYSTEM_FLAGS_KEY);
+
+			p_teclado->teclaPulsada.row = -1;
+			p_teclado->teclaPulsada.col = -1;
+			break;
+
+		/*case COL_3:
+		case COL_4:
+			printf("\nKeypress \"%c\"...\n",
+					tecladoTL04[p_teclado->teclaPulsada.row][p_teclado->teclaPulsada.col]);
+			fflush(stdout);
+			break;*/
+
+		default:
+			printf("\nERROR!!!! invalid number of column (%d)!!!\n", p_teclado->teclaPulsada.col);
+			fflush(stdout);
+
+			p_teclado->teclaPulsada.row = -1;
+			p_teclado->teclaPulsada.col = -1;
+
+			break;
 	}
-}*/
+
+	piUnlock (FLAG_KEY);
+
+}
 
 
+void timer_duracion_columna_isr (union sigval value) {
+	piLock (FLAG_KEY);
+	flags |= FLAG_TMR_TIMEOUT;
+	piUnlock (FLAG_KEY);
+}
 
-
-/*
-int main () {
-	unsigned int next;
-
-	fsm_trans_t columns[] = {
-		{ KEY_COL_1, CompruebaColumnTimeout, KEY_COL_2, col_2 },
-		{ KEY_COL_2, CompruebaColumnTimeout, KEY_COL_3, col_3 },
-		{ KEY_COL_3, CompruebaColumnTimeout, KEY_COL_4, col_4 },
-		{ KEY_COL_4, CompruebaColumnTimeout, KEY_COL_1, col_1 },
-		{-1, NULL, -1, NULL },
-	};
-
-	fsm_trans_t keypad[] = {
-		{ KEY_WAITING, key_pressed, KEY_WAITING, process_key},
-		{-1, NULL, -1, NULL },
-	};
-
-	initialize(&teclado);
-
-	fsm_t* columns_fsm = fsm_new (KEY_COL_1, columns, &teclado);
-	fsm_t* keypad_fsm = fsm_new (KEY_WAITING, keypad, &teclado);
-
-	next = millis();
-	while (1) {
-		fsm_fire (columns_fsm);
-		fsm_fire (keypad_fsm);
-
-		next += CLK_MS;
-		delay_until (next);
+int initialize(TipoTeclado *p_teclado) {
+	if (wiringPiSetupGpio() < 0) {
+	    fprintf (stderr, "Unable to setup wiringPi: %s\n", strerror (errno)) ;
+	    return 1 ;
 	}
+
+	// Comenzamos excitacion por primera columna
+	p_teclado->columna_actual = COL_1;
+
+	// Inicialmente no hay tecla pulsada
+	p_teclado->teclaPulsada.col = -1;
+	p_teclado->teclaPulsada.row = -1;
+
+	pinMode (GPIO_ROW_1, INPUT);
+	pullUpDnControl(GPIO_ROW_1, PUD_DOWN);
+	wiringPiISR (GPIO_ROW_1, INT_EDGE_RISING, row_1_isr);
+
+	pinMode (GPIO_ROW_2, INPUT);
+	pullUpDnControl(GPIO_ROW_2, PUD_DOWN);
+	wiringPiISR (GPIO_ROW_2, INT_EDGE_RISING, row_2_isr);
+
+	pinMode (GPIO_ROW_3, INPUT);
+	pullUpDnControl(GPIO_ROW_3, PUD_DOWN);
+	wiringPiISR (GPIO_ROW_3, INT_EDGE_RISING, row_3_isr);
+
+	pinMode (GPIO_ROW_4, INPUT);
+	pullUpDnControl(GPIO_ROW_4, PUD_DOWN);
+	wiringPiISR (GPIO_ROW_4, INT_EDGE_RISING, row_4_isr);
+
+	pinMode (GPIO_COL_1, OUTPUT);
+	digitalWrite (GPIO_COL_1, HIGH);
+
+	pinMode (GPIO_COL_2, OUTPUT);
+	digitalWrite (GPIO_COL_2, LOW);
+
+	pinMode (GPIO_COL_3, OUTPUT);
+	digitalWrite (GPIO_COL_3, LOW);
+
+	pinMode (GPIO_COL_4, OUTPUT);
+	digitalWrite (GPIO_COL_4, LOW);
+
+	p_teclado->tmr_duracion_columna = tmr_new (timer_duracion_columna_isr);
+	tmr_startms((tmr_t*)(p_teclado->tmr_duracion_columna), COL_REFRESH_TIME);
+
+	printf("\nSystem init complete! keypad ready to process the code!!!\n");
+	fflush(stdout);
+
 	return 0;
 }
-*/
+
+

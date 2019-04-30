@@ -16,6 +16,8 @@
 
 #include "fsm.h"
 #include "tmr.h"
+#include "piTankGoLib.h"
+
 
 #define GPIO_COL_1 0
 #define GPIO_COL_2 1
@@ -27,7 +29,7 @@
 #define GPIO_ROW_3 12
 #define GPIO_ROW_4 13
 
-//#define CLK_MS 			5
+#define CLK_MS 			5
 #define	DEBOUNCE_TIME	200
 #define COL_REFRESH_TIME 25
 
@@ -74,5 +76,16 @@ typedef struct {
 	tmr_t* tmr_duracion_columna;
 	TipoTecla teclaPulsada;
 } TipoTeclado;
+
+TipoTeclado teclado;
+
+int initialize(TipoTeclado *p_teclado);
+void col_1 (fsm_t* this);
+void col_2 (fsm_t* this);
+void col_3 (fsm_t* this);
+void col_4 (fsm_t* this);
+int key_pressed (fsm_t* this);
+void process_key (fsm_t* this);
+int CompruebaColumnTimeout (fsm_t* this);
 
 #endif /* _TECLADO_TL04_H_ */

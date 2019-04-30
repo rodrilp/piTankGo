@@ -1,8 +1,9 @@
 
 #include "player.h"
 #include <string.h>
-#include <pthread.h>
-#include <softTone.h>
+//#include "tmr.h"
+//#include <pthread.h>
+//#include <softTone.h>
 
 
 //------------------------------------------------------
@@ -51,11 +52,11 @@ void InicializaPlayer (TipoPlayer *p_player) {
 	p_player->duracion_nota_actual = p_player->p_efecto->duraciones[p_player->posicion_nota_actual];
 
 	piLock(STD_IO_BUFFER_KEY);
-	printf("\n[PLAYER][InicializaPlayer][NOTA 0][FREC %d][DURA %d]\n", p_player->frecuencia_nota_actual,p_player->duracion_nota_actual);
+	printf("\n[PLAYER][InicializaPlayer][NOTA 1][FREC %d][DURA %d]\n", p_player->frecuencia_nota_actual,p_player->duracion_nota_actual);
 	piUnlock(STD_IO_BUFFER_KEY);
 
 	piLock(STD_IO_BUFFER_KEY);
-	flags_player &=  ~FLAG_START_DISPARO;
+	//flags_player &=  ~FLAG_START_DISPARO;
 	p_player->timer = tmr_new(timer_player_duracion_nota_actual_isr);
 	//tmr_startms(p_player->timer,p_player->duracion_nota_actual);
 	piUnlock(STD_IO_BUFFER_KEY);
@@ -138,7 +139,7 @@ void InicializaPlayDisparo (fsm_t* this) {
 
 
 	p_player->p_efecto = & (p_player->efecto_disparo);
-	InicializaPlayer(p_player);
+	//InicializaPlayer(p_player);
 	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
 
 }
@@ -155,22 +156,23 @@ void InicializaPlayImpacto (fsm_t* this) {
 	fflush(stdout);
 	piUnlock (STD_IO_BUFFER_KEY);
 
-	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
 	p_player->p_efecto = & (p_player->efecto_impacto);
-	InicializaPlayer(p_player);
+	//InicializaPlayer(p_player);
+	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
 
 
 }
 
 void ComienzaNuevaNota (fsm_t* this) {
 	TipoPlayer *p_player = (TipoPlayer*)this->user_data;
+	p_player->frecuencia_nota_actual = p_player->p_efecto->frecuencias[p_player->posicion_nota_actual];
 
 	piLock (PLAYER_FLAGS_KEY);
 	flags_player &= ~FLAG_PLAYER_END;
 	piUnlock (PLAYER_FLAGS_KEY);
 
 	piLock (STD_IO_BUFFER_KEY);
-	printf("[Player][ComienzaNuevaNota][NOTA %d] [FREC %d] [DURA %d]\n",p_player->posicion_nota_actual, p_player->frecuencia_nota_actual, p_player->duracion_nota_actual);
+	printf("[Player][ComienzaNuevaNota][NOTA %d] [FREC %d] [DURA %d]\n",p_player->posicion_nota_actual +1, p_player->frecuencia_nota_actual, p_player->duracion_nota_actual);
 	piUnlock (STD_IO_BUFFER_KEY);
 
 	tmr_startms(p_player->timer,p_player->duracion_nota_actual);
@@ -185,7 +187,7 @@ void ActualizaPlayer (fsm_t* this) {
 	piUnlock (PLAYER_FLAGS_KEY);
 
 	piLock (STD_IO_BUFFER_KEY);
-	if(p_player->posicion_nota_actual >= p_player->p_efecto->num_notas){
+	if(p_player->posicion_nota_actual >= (p_player->p_efecto->num_notas -1 )){
 		printf("SE HAN REPRODUCIDO TODAS LAS NOTAS\n");
 		fflush(stdout);
 
@@ -198,11 +200,12 @@ void ActualizaPlayer (fsm_t* this) {
 		//tmr_startms((tmr_t*)(p_player->timer), p_player->duracion_nota_actual);
 
 		p_player->posicion_nota_actual++;
-		printf("[Player][ActualizaPlayer][NUEVA NOTA (%d DE %d)]\n", p_player ->posicion_nota_actual, p_player->p_efecto->num_notas);
+		printf("[Player][ActualizaPlayer][NUEVA NOTA (%d DE %d)]\n", p_player ->posicion_nota_actual+1, (p_player->p_efecto->num_notas ));
 		fflush(stdout);
 
 		piLock (PLAYER_FLAGS_KEY);
 		flags_player &= ~FLAG_PLAYER_END;
+		flags_player |= FLAG_NOTA_TIMEOUT;
 		piUnlock (PLAYER_FLAGS_KEY);
 
 	}

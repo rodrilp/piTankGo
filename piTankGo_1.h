@@ -17,7 +17,6 @@
 #include "player.h"
 #include "torreta.h"
 #include "teclado_TL04.h"
-#include "teclado_TL04.c"
 
 // Posibles estados de las FSMs
 enum fsm_state {
@@ -38,6 +37,7 @@ enum fsm_state {
 typedef struct {
 	//TipoTorreta torreta; // Objeto para el control de la torreta
 	TipoPlayer player; // Reproductor de efectos
+	TipoTeclado teclado;
 	char teclaPulsada;  // Variable que almacena la ultima tecla pulsada
 	int debug; // Variable que habilita o deshabilita la impresion de mensajes por salida estandar
 } TipoSistema;
@@ -47,11 +47,10 @@ typedef struct {
 //------------------------------------------------------
 int ConfiguraSistema (TipoSistema *p_sistema);
 int InicializaSistema (TipoSistema *p_sistema);
-int initialize(TipoTeclado *p_teclado);
 
 //------------------------------------------------------
 // FUNCIONES LIGADAS A THREADS ADICIONALES
 //------------------------------------------------------
-//PI_THREAD(thread_explora_teclado_PC);
+PI_THREAD(thread_explora_teclado_PC);
 
 #endif /* _PITANKGO_1_H_ */
