@@ -11,9 +11,9 @@
 
 // ATENCION: Valores a modificar por el alumno
 // INTERVALO DE GUARDA ANTI-REBOTES
-#define	DEBOUNCE_TIME	150
+#define	DEBOUNCE_TIME	500
 // DURACION DISPARO IR
-#define SHOOTING_PERIOD 2000
+#define SHOOTING_PERIOD 200000
 
 // CLAVES PARA MUTEX
 // ATENCION: Valores a modificar por el alumno
@@ -41,17 +41,17 @@
 
 // Distribucion de pines GPIO empleada para el enlace IR
 // ATENCION: Valores a modificar por el alumno
-#define	IR_TX_PIN		24
-#define	IR_RX_PIN		25
+#define	IR_TX_PIN		24 // PIN 20 salidas
+#define	IR_RX_PIN		20 // PIN 14 entradas
 
 // Distribucion de pines GPIO empleada para la reproducción de efectos
 // ATENCION: Valores a modificar por el alumno
-#define PLAYER_PWM_PIN 	23
+#define PLAYER_PWM_PIN 	23 //pin 19 salidas
 
 // Distribucion de pines GPIO empleada para el control de los servos
 // ATENCION: Valores a modificar por el alumno
-#define	SERVO_VERTICAL_PIN		18
-#define	SERVO_HORIZONTAL_PIN	22
+#define	SERVO_VERTICAL_PIN		18 // pin 17 salidas
+#define	SERVO_HORIZONTAL_PIN	22 // pin 18 salidas
 
 // FLAGS FSM CONTROL DE JUEGO Y TORRETA
 // ATENCION: Valores a modificar por el alumno

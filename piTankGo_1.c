@@ -41,9 +41,7 @@ int ConfiguraSistema (TipoSistema *p_sistema) {
 
 	wiringPiSetupGpio();
 
-	pinMode(PLAYER_PWM_PIN, OUTPUT);
-	softToneCreate(PLAYER_PWM_PIN);
-	digitalWrite(PLAYER_PWM_PIN,0);
+
 
 	return result;
 }
@@ -65,7 +63,7 @@ int InicializaSistema (TipoSistema *p_sistema) {
 //------------------------------------------------------
 // SUBRUTINAS DE ATENCION A LAS INTERRUPCIONES
 //------------------------------------------------------
-
+/*
 PI_THREAD (thread_explora_teclado_PC) {
 	int teclaPulsada;
 
@@ -110,9 +108,10 @@ PI_THREAD (thread_explora_teclado_PC) {
 		piUnlock (STD_IO_BUFFER_KEY);
 	}
 }
+*/
 
 
-
+//boorar esto de abajo???
 void fsm_setup(fsm_t* luz_fsm){
 	piLock(PLAYER_FLAGS_KEY);
 	flags_player = 0;
@@ -139,9 +138,6 @@ int main (){
 		{-1, NULL, -1, NULL },
 	};
 
-	//fsm_setup(player_fsm);
-
-
 	fsm_trans_t columns[] = {
 		{ KEY_COL_1, CompruebaColumnTimeout, KEY_COL_2, col_2 },
 		{ KEY_COL_2, CompruebaColumnTimeout, KEY_COL_3, col_3 },
@@ -155,9 +151,6 @@ int main (){
 		{-1, NULL, -1, NULL },
 	};
 
-
-
-
 	fsm_trans_t servo_basico[] = {
 		{ WAIT_KEY, CompruebaJoystickUp, WAIT_KEY, MueveTorretaArriba },
 		{ WAIT_KEY, CompruebaJoystickDown, WAIT_KEY, MueveTorretaAbajo },
@@ -165,7 +158,6 @@ int main (){
 		{ WAIT_KEY, CompruebaJoystickRight, WAIT_KEY, MueveTorretaDerecha },
 		{-1, NULL, -1, NULL },
 	};
-
 
 	fsm_trans_t juego[] = {
 		{ WAIT_START, CompruebaComienzo, WAIT_MOVE, ComienzaSistema },
@@ -186,21 +178,18 @@ int main (){
 	fsm_t* player_fsm = fsm_new (WAIT_START, reproductor, &(sistema.player));
 	fsm_t* torreta_fsm = fsm_new (WAIT_START, juego, &(sistema.torreta));
 
-
-
 	next = millis();
 	while (1) {
 
 		fsm_fire(columns_fsm);
 		fsm_fire(keypad_fsm);
-		fsm_fire (player_fsm);
 		fsm_fire (servo_fsm);
+		fsm_fire (player_fsm);
 		fsm_fire (torreta_fsm);
 
 		next += CLK_MS;
 		delay_until (next);
 	}
 
-	//fsm_destroy (player_fsm);
 	return 0;
 }

@@ -47,7 +47,7 @@ int InicializaEfecto (TipoEfecto *p_efecto, char *nombre, int *array_frecuencias
 // Nota: parte inicialización común a InicializaPlayDisparo y InicializaPlayImpacto
 void InicializaPlayer (TipoPlayer *p_player) {
 
-	InicializaEfecto(&(p_player->efecto_disparo),"Disparo", frecuenciasDisparo, tiemposDisparo,16);
+	InicializaEfecto(&(p_player->efecto_disparo),"Disparo", frecuenciaGOT, tiempoGOT,518);
 	InicializaEfecto(&(p_player->efecto_impacto),"Impacto", frecuenciasImpacto, tiemposImpacto,32);
 
 	p_player->p_efecto = &(p_player->efecto_disparo);
@@ -60,10 +60,12 @@ void InicializaPlayer (TipoPlayer *p_player) {
 	printf("\n[PLAYER][InicializaPlayer][NOTA 1][FREC %d][DURA %d]\n", p_player->frecuencia_nota_actual,p_player->duracion_nota_actual);
 	piUnlock(STD_IO_BUFFER_KEY);
 
-	
+	pinMode(PLAYER_PWM_PIN, OUTPUT);
+	//softPwmCreate(PLAYER_PWM_PIN);
+	digitalWrite(PLAYER_PWM_PIN,0);
 
 	p_player->timer = tmr_new(timer_player_duracion_nota_actual_isr);
-	
+
 }
 
 //------------------------------------------------------
@@ -154,6 +156,7 @@ void InicializaPlayImpacto (fsm_t* this) {
 
 	piLock (PLAYER_FLAGS_KEY);
 	flags_player &= ~FLAG_START_IMPACTO;
+	flags_player &= ~FLAG_START_DISPARO;
 	piUnlock (PLAYER_FLAGS_KEY);
 
 	piLock (STD_IO_BUFFER_KEY);
@@ -201,7 +204,7 @@ void ActualizaPlayer (fsm_t* this) {
 	piUnlock (PLAYER_FLAGS_KEY);
 
 	p_player->posicion_nota_actual++;
-	
+
 	if(p_player->posicion_nota_actual >= (p_player->p_efecto->num_notas )){
 
 		piLock (PLAYER_FLAGS_KEY);
@@ -218,14 +221,14 @@ void ActualizaPlayer (fsm_t* this) {
 		p_player->frecuencia_nota_actual = p_player->p_efecto->frecuencias[p_player->posicion_nota_actual];
 		p_player->duracion_nota_actual = p_player->p_efecto->duraciones[p_player->posicion_nota_actual];
 	}
-	
+
 
 }
 
 void FinalEfecto (fsm_t* this) {
 	piLock (PLAYER_FLAGS_KEY);
 	flags_player &= ~FLAG_PLAYER_END;
-	flags_player &= ~FLAG_START_DISPARO;
+	//flags_player &= ~FLAG_START_DISPARO;
 	piUnlock (PLAYER_FLAGS_KEY);
 
 	softToneWrite(PLAYER_PWM_PIN,0);

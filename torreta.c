@@ -291,6 +291,8 @@ void ImpactoDetectado (fsm_t* this) {
 	flags_juego &= (~FLAG_TARGET_DONE);
 	piUnlock(SYSTEM_FLAGS_KEY);
 
+	digitalWrite(IR_TX_PIN, LOW);
+
 	piLock (STD_IO_BUFFER_KEY);
 	printf("IMPACTO DETECTADO");
 	fflush(stdout);
