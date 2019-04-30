@@ -74,7 +74,7 @@ int CompruebaStartDisparo (fsm_t* this) {
 
 	piLock(PLAYER_FLAGS_KEY);
 	result = (flags_player & FLAG_START_DISPARO);
-	piUnlock (PLAYER_FLAGS_KEY);
+	piUnlock(PLAYER_FLAGS_KEY);
 
 	return result;
 }
@@ -227,6 +227,8 @@ void FinalEfecto (fsm_t* this) {
 	printf("Final Efecto\n");
 	fflush(stdout);
 	piUnlock (STD_IO_BUFFER_KEY);
+
+
 }
 
 //------------------------------------------------------

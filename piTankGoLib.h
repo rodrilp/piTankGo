@@ -50,20 +50,20 @@
 
 // Distribucion de pines GPIO empleada para el control de los servos
 // ATENCION: Valores a modificar por el alumno
-#define	SERVO_VERTICAL_PIN		0
-#define	SERVO_HORIZONTAL_PIN	0
+#define	SERVO_VERTICAL_PIN		18
+#define	SERVO_HORIZONTAL_PIN	22
 
 // FLAGS FSM CONTROL DE JUEGO Y TORRETA
 // ATENCION: Valores a modificar por el alumno
-#define FLAG_SYSTEM_START 		0x00
-#define FLAG_JOYSTICK_UP 		0x00
-#define FLAG_JOYSTICK_DOWN 		0x00
-#define FLAG_JOYSTICK_LEFT		0x00
-#define FLAG_JOYSTICK_RIGHT		0x00
-#define FLAG_TRIGGER_BUTTON		0x00
-#define FLAG_SHOOT_TIMEOUT		0x00
-#define FLAG_TARGET_DONE		0x00
-#define FLAG_SYSTEM_END			0x00
+#define FLAG_SYSTEM_START 		0x01
+#define FLAG_JOYSTICK_UP 		0x02
+#define FLAG_JOYSTICK_DOWN 		0x04
+#define FLAG_JOYSTICK_LEFT		0x08
+#define FLAG_JOYSTICK_RIGHT		0x10
+#define FLAG_TRIGGER_BUTTON		0x20
+#define FLAG_SHOOT_TIMEOUT		0x40
+#define FLAG_TARGET_DONE		0x80
+#define FLAG_SYSTEM_END			0x100
 
 // FLAGS FSM REPRODUCCION DE EFECTOS DE SONIDO
 // ATENCION: Valores a modificar por el alumno

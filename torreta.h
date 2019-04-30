@@ -11,15 +11,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <wiringPi.h>
+#include <softPwm.h>
 
 #include "piTankGoLib.h"
 
-/*typedef struct {
+
+
+
+#define SERVO_INCREMENTO 1
+#define SERVO_MINIMO 9
+#define SERVO_MAXIMO 22
+
+#define SERVO_PWM_RANGE 400
+
+#define SERVO_PIN 13
+
+typedef struct {
 	int inicio; // Valor correspondiente a la posicion inicial del servo
 	int incremento; // Cuantía en que se incrementa el valor de la posicion con cada movimiento del servo
 	int minimo; // Valor mínimo correspondiente a la posicion del servo
 	int maximo; // Valor maximo correspondiente a la posicion del servo
-} TipoServo;*/
+} TipoServo;
 
 typedef struct {
 	int x; // Coordenada x correspondiente a la posicion del servo horizontal
@@ -32,14 +44,16 @@ typedef struct {
 	TipoServo servo_y;
 
 
-	int inicio; // Valor correspondiente a la posicion inicial del servo
-	int incremento; // Cuantía en que se incrementa el valor de la posicion con cada movimiento del servo
-	int minimo; // Valor mínimo correspondiente a la posicion del servo
-	int maximo; // Valor maximo correspondiente a la posicion del servo
+	//int inicio; // Valor correspondiente a la posicion inicial del servo
+	//int incremento; // Cuantía en que se incrementa el valor de la posicion con cada movimiento del servo
+	//int minimo; // Valor mínimo correspondiente a la posicion del servo
+	//int maximo; // Valor maximo correspondiente a la posicion del servo
 
 } TipoTorreta;
 
 extern int flags_juego;
+
+
 
 // Prototipos de procedimientos de inicializacion de los objetos especificos
 void InicializaTorreta (TipoTorreta *p_torreta);

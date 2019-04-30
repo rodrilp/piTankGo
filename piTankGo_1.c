@@ -123,13 +123,6 @@ PI_THREAD (thread_explora_teclado_PC) {
 }
 
 
-// wait until next_activation (absolute time)
-//void delay_until (unsigned int next) {
-//	unsigned int now = millis();
-//	if (next > now) {
-//		delay (next - now);
-//	}
-//}
 
 void fsm_setup(fsm_t* luz_fsm){
 	piLock(PLAYER_FLAGS_KEY);
@@ -140,7 +133,7 @@ void fsm_setup(fsm_t* luz_fsm){
 int main (){
 	unsigned int next;
 	TipoSistema sistema;
-	TipoPlayer p_player;
+
 	TipoTorreta torreta;
 
 
@@ -154,10 +147,10 @@ int main (){
 	// Configuracion e inicializacion del sistema
 	ConfiguraSistema (&sistema);
 	InicializaSistema (&sistema);
-	InicializaTorreta (&torreta);
+	initialize(&teclado);
 
 
-	/*fsm_trans_t reproductor[] = {
+	fsm_trans_t reproductor[] = {
 		{ WAIT_START, CompruebaStartDisparo, WAIT_NEXT, InicializaPlayDisparo },
 		{ WAIT_START, CompruebaStartImpacto, WAIT_NEXT, InicializaPlayImpacto },
 		{ WAIT_NEXT, CompruebaStartImpacto, WAIT_NEXT, InicializaPlayImpacto },
@@ -165,10 +158,10 @@ int main (){
 		{ WAIT_END, CompruebaFinalEfecto, WAIT_START, FinalEfecto },
 		{ WAIT_END, CompruebaNuevaNota, WAIT_NEXT, ComienzaNuevaNota},
 		{-1, NULL, -1, NULL },
-	};*/
+	};
 
-	fsm_setup(player_fsm);
-	initialize(&teclado);
+	//fsm_setup(player_fsm);
+
 
 	fsm_trans_t columns[] = {
 		{ KEY_COL_1, CompruebaColumnTimeout, KEY_COL_2, col_2 },
@@ -183,8 +176,7 @@ int main (){
 		{-1, NULL, -1, NULL },
 	};
 
-	fsm_t* columns_fsm = fsm_new (KEY_COL_1, columns, &teclado);
-	fsm_t* keypad_fsm = fsm_new (KEY_WAITING, keypad, &teclado);
+
 
 
 	fsm_trans_t servo_basico[] = {
@@ -196,36 +188,40 @@ int main (){
 	};
 
 
-	fsm_trans_t reproductor[] = {
+	fsm_trans_t juego[] = {
 		{ WAIT_START, CompruebaComienzo, WAIT_NEXT, ComienzaSistema },
 		{ WAIT_MOVE, CompruebaJoystickUp, WAIT_MOVE, MueveTorretaArriba },
 		{ WAIT_MOVE,CompruebaJoystickLeft , WAIT_MOVE, MueveTorretaIzquierda },
 		{ WAIT_MOVE, CompruebaJoystickRight, WAIT_MOVE, MueveTorretaDerecha },
 		{ WAIT_MOVE, CompruebaJoystickDown, WAIT_MOVE, MueveTorretaAbajo},
-		{ WAIT_MOVE, CompruebaTriggerButton, WAIT_TRIGGER_BUTTON, DisparoIR},
-		{ WAIT_TRIGGER_BUTTON, CompruebaTimeoutDisparo, WAIT_MOVE, FinalDisparoIR},
-		{ WAIT_TRIGGER_BUTTON, CompruebaImpacto, WAIT_MOVE, ImpactoDetectado},
+		{ WAIT_MOVE, CompruebaTriggerButton, TRIGGER_BUTTON, DisparoIR},
+		{ TRIGGER_BUTTON, CompruebaTimeoutDisparo, WAIT_MOVE, FinalDisparoIR},
+		{ TRIGGER_BUTTON, CompruebaImpacto, WAIT_MOVE, ImpactoDetectado},
 		{ WAIT_MOVE, CompruebaFinalJuego, WAIT_END, FinalizaJuego },
 		{-1, NULL, -1, NULL },
 	};
 
-
+	fsm_t* columns_fsm = fsm_new (KEY_COL_1, columns, &teclado);
+	fsm_t* keypad_fsm = fsm_new (KEY_WAITING, keypad, &teclado);
 	fsm_t* servo_fsm = fsm_new (WAIT_KEY, servo_basico, &torreta);
 	fsm_t* player_fsm = fsm_new (WAIT_START, reproductor, &(sistema.player));
+	fsm_t* torreta_fsm = fsm_new (WAIT_START, juego, &(sistema.torreta));
 	
 
 
 	next = millis();
 	while (1) {
-		fsm_fire (player_fsm);
 
 		fsm_fire(columns_fsm);
 		fsm_fire(keypad_fsm);
+		fsm_fire (player_fsm);
+		fsm_fire (servo_fsm);
+		fsm_fire (torreta_fsm);
 
 		next += CLK_MS;
 		delay_until (next);
 	}
 
-	fsm_destroy (player_fsm);
+	//fsm_destroy (player_fsm);
 	return 0;
 }

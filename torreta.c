@@ -1,14 +1,16 @@
 
 #include "torreta.h"
-#include "servo_basico.h"
+
 
 //------------------------------------------------------
 // PROCEDIMIENTOS DE INICIALIZACION DE LOS OBJETOS ESPECIFICOS
 //------------------------------------------------------
 
-int flags_torreta = 0;
 
 void InicializaTorreta (TipoTorreta *p_torreta) {
+
+	flags_juego = 1;
+
 
 	wiringPiSetupGpio();
 
@@ -25,13 +27,19 @@ void InicializaTorreta (TipoTorreta *p_torreta) {
 		p_torreta->posicion.y = p_torreta->maximo;
 	}
 
-	if((p_torreta->posicion < p_torreta->minimo) || (p_torreta->posicion.y > p_torreta->minimo)){
+	if((p_torreta->posicion.x < p_torreta->minimo) || (p_torreta->posicion.y > p_torreta->minimo)){
 		p_torreta->posicion.x = p_torreta->minimo;
 		p_torreta->posicion.y = p_torreta->minimo;
 	}
 
-	softPwmCreate (SERVO_PIN, p_torreta->inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
-	softPwmWrite(SERVO_PIN, p_torreta->posicion);
+	pinMode(SERVO_VERTICAL_PIN, OUTPUT);
+	softPwmCreate (SERVO_VERTICAL_PIN, p_torreta->inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
+	softPwmWrite(SERVO_VERTICAL_PIN, p_torreta->posicion.y);
+
+	pinMode(SERVO_HORIZONTAL_PIN, OUTPUT);
+	softPwmCreate (SERVO_HORIZONTAL_PIN, p_torreta->inicio, SERVO_PWM_RANGE); // Internamente ya hace: piHiPri (90) ;
+	softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta->posicion.x);
+
 }
 
 //------------------------------------------------------
@@ -40,55 +48,81 @@ void InicializaTorreta (TipoTorreta *p_torreta) {
 
 int CompruebaComienzo (fsm_t* this) {
 	int result = 0;
-	result = (flags_torreta & FLAG_SYSTEM_START);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_SYSTEM_START);
+	piUnlock(SYSTEM_FLAGS_KEY);
 	return result;
 }
 
 int CompruebaJoystickUp (fsm_t* this) {
 	int result = 0;
-	result = (flags_torreta & FLAG_JOYSTICK_UP);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_JOYSTICK_UP);
+	piUnlock(SYSTEM_FLAGS_KEY);
+
 	return result;
 }
 
 int CompruebaJoystickDown (fsm_t* fsm_player){
 	int result = 0;
-	result = (flags_torreta & FLAG_JOYSTICK_DOWN);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_JOYSTICK_DOWN);
+	piUnlock(SYSTEM_FLAGS_KEY);
+
 	return result;
 }
 
 int CompruebaJoystickLeft (fsm_t* this) {
 	int result = 0;
-	result = (flags_torreta & FLAG_JOYSTICK_LEFT);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_JOYSTICK_LEFT);
+	piUnlock(SYSTEM_FLAGS_KEY);
+
 	return result;
 }
 
 int CompruebaJoystickRight (fsm_t* this) {
 	int result = 0;
-	result = (flags_torreta & FLAG_JOYSTICK_RIGHT);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_JOYSTICK_RIGHT);
+	piUnlock(SYSTEM_FLAGS_KEY);
+
 	return result;
 }
 
 int CompruebaTimeoutDisparo (fsm_t* this) {
 	int result = 0;
-	result = (flags_torreta & FLAG_SHOOT_TIMEOUT);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_SHOOT_TIMEOUT);
+	piUnlock(SYSTEM_FLAGS_KEY);
+
 	return result;
 }
 
 int CompruebaImpacto (fsm_t* this) {
 	int result = 0;
-	result = (flags_torreta & FLAG_TARGET_DONE);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_TARGET_DONE);
+	piUnlock(SYSTEM_FLAGS_KEY);
+
 	return result;
 }
 
 int CompruebaTriggerButton (fsm_t* this) {
 	int result = 0;
-	result = (flags_torreta & FLAG_TRIGGER_BUTTON);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_TRIGGER_BUTTON);
+	piUnlock(SYSTEM_FLAGS_KEY);
+
 	return result;
 }
 
 int CompruebaFinalJuego (fsm_t* this) {
 	int result = 0;
-	result = (flags_torreta & FLAG_SYSTEM_END);
+	piLock(SYSTEM_FLAGS_KEY);
+	result = (flags_juego & FLAG_SYSTEM_END);
+	piUnlock(SYSTEM_FLAGS_KEY);
+
 	return result;
 }
 
@@ -97,14 +131,22 @@ int CompruebaFinalJuego (fsm_t* this) {
 //------------------------------------------------------
 
 void ComienzaSistema (fsm_t* this) {
-	// A completar por el alumno
-	// ...
+	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
+
+	flags_juego =0;
+
+	InicializaTorreta (p_torreta);
+
+	printf("Comienza el juego");
+	fflush(stdout);
+
+
 }
 
 void MueveTorretaArriba (fsm_t* this) {
 	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
 
-	flags_torreta &= (~FLAG_JOYSTICK_UP);
+	flags_juego &= (~FLAG_JOYSTICK_UP);
 
 	if(p_torreta->posicion.y + p_torreta->incremento <= p_torreta->maximo){
 		p_torreta-> posicion.y = p_torreta->posicion.y + p_torreta->incremento;
@@ -120,7 +162,7 @@ void MueveTorretaArriba (fsm_t* this) {
 void MueveTorretaAbajo (fsm_t* this) {
 	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
 
-	flags_torreta &= (~FLAG_JOYSTICK_DOWN);
+	flags_juego &= (~FLAG_JOYSTICK_DOWN);
 
 	if(p_torreta->posicion.y - p_torreta->incremento >= p_torreta->minimo){
 		p_torreta-> posicion.y = p_torreta->posicion.y - p_torreta->incremento;
@@ -135,12 +177,12 @@ void MueveTorretaAbajo (fsm_t* this) {
 void MueveTorretaIzquierda (fsm_t* this) {
 	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
 
-	flags_torreta &= (~FLAG_JOYSTICK_LEFT);
+	flags_juego &= (~FLAG_JOYSTICK_LEFT);
 
 	if(p_torreta->posicion.x + p_torreta->incremento <= p_torreta->maximo){
 		p_torreta-> posicion.x = p_torreta->posicion.x + p_torreta->incremento;
 
-		softPwmWrite(SERVO_VERTICAL_PIN, p_torreta-> posicion.x);
+		softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta-> posicion.x);
 
 		printf("[SERVO][POSICION]=[%d]\n", p_torreta->posicion.x);
 		fflush(stdout);
@@ -150,12 +192,12 @@ void MueveTorretaIzquierda (fsm_t* this) {
 void MueveTorretaDerecha (fsm_t* this) {
 	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
 
-	flags_torreta &= (~FLAG_JOYSTICK_RIGHT);
+	flags_juego &= (~FLAG_JOYSTICK_RIGHT);
 
 	if(p_torreta->posicion.x + p_torreta->incremento <= p_torreta->maximo){
 		p_torreta-> posicion.x = p_torreta->posicion.x + p_torreta->incremento;
 
-		softPwmWrite(SERVO_VERTICAL_PIN, p_torreta-> posicion.x);
+		softPwmWrite(SERVO_HORIZONTAL_PIN, p_torreta-> posicion.x);
 
 		printf("[SERVO][POSICION]=[%d]\n", p_torreta->posicion.x);
 		fflush(stdout);
@@ -163,21 +205,26 @@ void MueveTorretaDerecha (fsm_t* this) {
 }
 
 void DisparoIR (fsm_t* this) {
-	// A completar por el alumno
-	// ...
+
+	//piLock(PLAYER_FLAGS_KEY);
+	//flags_player |= FLAG_START_DISPARO;
+	//piUnlock(PLAYER_FLAGS_KEY);
+
+	printf("DISPARO IR");
+	fflush(stdout);
 }
 
 void FinalDisparoIR (fsm_t* this) {
-	// A completar por el alumno
-	// ...
+	printf("FIN DISPARO IR");
+	fflush(stdout);
 }
 
 void ImpactoDetectado (fsm_t* this) {
-	// A completar por el alumno
-	// ...
+	printf("IMPACTO DETECTADO");
+	fflush(stdout);
 }
 
 void FinalizaJuego (fsm_t* this) {
-	// A completar por el alumno
-	// ...
+	printf("FIN DEL JUEGO");
+	fflush(stdout);
 }

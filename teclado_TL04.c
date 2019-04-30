@@ -222,6 +222,46 @@ void process_key (fsm_t* this) {
 				fflush(stdout);
 				piUnlock(PLAYER_FLAGS_KEY);
 				break;
+
+			case '2':
+				piLock(SYSTEM_FLAGS_KEY);
+				flags_juego |= FLAG_JOYSTICK_UP;
+				printf("Tecla 2 pulsada!\n");
+				fflush(stdout);
+				piUnlock(SYSTEM_FLAGS_KEY);
+				break;
+
+			case '4':
+				piLock(SYSTEM_FLAGS_KEY);
+				flags_juego |= FLAG_JOYSTICK_LEFT;
+				printf("Tecla 4 pulsada!\n");
+				fflush(stdout);
+				piUnlock(SYSTEM_FLAGS_KEY);
+				break;
+
+			case '8':
+				piLock(SYSTEM_FLAGS_KEY);
+				flags_juego |= FLAG_JOYSTICK_DOWN;
+				printf("Tecla 8 pulsada!\n");
+				fflush(stdout);
+				piUnlock(SYSTEM_FLAGS_KEY);
+				break;
+
+			case '6':
+				piLock(SYSTEM_FLAGS_KEY);
+				flags_juego |= FLAG_JOYSTICK_RIGHT;
+				printf("Tecla 6 pulsada!\n");
+				fflush(stdout);
+				piUnlock(SYSTEM_FLAGS_KEY);
+				break;
+
+			case '0':
+				piLock(SYSTEM_FLAGS_KEY);
+				flags_juego |= FLAG_SYSTEM_START;
+				printf("Tecla 0 pulsada!\n");
+				fflush(stdout);
+				piUnlock(SYSTEM_FLAGS_KEY);
+				break;
 			}
 			break;
 
