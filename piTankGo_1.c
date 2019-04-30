@@ -140,7 +140,8 @@ void fsm_setup(fsm_t* luz_fsm){
 int main (){
 	unsigned int next;
 	TipoSistema sistema;
-	//TipoPlayer p_player;
+	TipoPlayer p_player;
+	TipoTorreta torreta;
 
 
 
@@ -153,8 +154,10 @@ int main (){
 	// Configuracion e inicializacion del sistema
 	ConfiguraSistema (&sistema);
 	InicializaSistema (&sistema);
+	InicializaTorreta (&torreta);
 
-	fsm_trans_t reproductor[] = {
+
+	/*fsm_trans_t reproductor[] = {
 		{ WAIT_START, CompruebaStartDisparo, WAIT_NEXT, InicializaPlayDisparo },
 		{ WAIT_START, CompruebaStartImpacto, WAIT_NEXT, InicializaPlayImpacto },
 		{ WAIT_NEXT, CompruebaStartImpacto, WAIT_NEXT, InicializaPlayImpacto },
@@ -162,9 +165,8 @@ int main (){
 		{ WAIT_END, CompruebaFinalEfecto, WAIT_START, FinalEfecto },
 		{ WAIT_END, CompruebaNuevaNota, WAIT_NEXT, ComienzaNuevaNota},
 		{-1, NULL, -1, NULL },
-	};
+	};*/
 
-	fsm_t* player_fsm = fsm_new (WAIT_START, reproductor, &(sistema.player));
 	fsm_setup(player_fsm);
 	initialize(&teclado);
 
@@ -183,6 +185,35 @@ int main (){
 
 	fsm_t* columns_fsm = fsm_new (KEY_COL_1, columns, &teclado);
 	fsm_t* keypad_fsm = fsm_new (KEY_WAITING, keypad, &teclado);
+
+
+	fsm_trans_t servo_basico[] = {
+		{ WAIT_KEY, CompruebaJoystickUp, WAIT_KEY, MueveTorretaArriba },
+		{ WAIT_KEY, CompruebaJoystickDown, WAIT_KEY, MueveTorretaAbajo },
+		{ WAIT_KEY, CompruebaJoystickLeft, WAIT_KEY,MueveTorretaIzquierda },
+		{ WAIT_KEY, CompruebaJoystickRight, WAIT_KEY, MueveTorretaDerecha },
+		{-1, NULL, -1, NULL },
+	};
+
+
+	fsm_trans_t reproductor[] = {
+		{ WAIT_START, CompruebaComienzo, WAIT_NEXT, ComienzaSistema },
+		{ WAIT_MOVE, CompruebaJoystickUp, WAIT_MOVE, MueveTorretaArriba },
+		{ WAIT_MOVE,CompruebaJoystickLeft , WAIT_MOVE, MueveTorretaIzquierda },
+		{ WAIT_MOVE, CompruebaJoystickRight, WAIT_MOVE, MueveTorretaDerecha },
+		{ WAIT_MOVE, CompruebaJoystickDown, WAIT_MOVE, MueveTorretaAbajo},
+		{ WAIT_MOVE, CompruebaTriggerButton, WAIT_TRIGGER_BUTTON, DisparoIR},
+		{ WAIT_TRIGGER_BUTTON, CompruebaTimeoutDisparo, WAIT_MOVE, FinalDisparoIR},
+		{ WAIT_TRIGGER_BUTTON, CompruebaImpacto, WAIT_MOVE, ImpactoDetectado},
+		{ WAIT_MOVE, CompruebaFinalJuego, WAIT_END, FinalizaJuego },
+		{-1, NULL, -1, NULL },
+	};
+
+
+	fsm_t* servo_fsm = fsm_new (WAIT_KEY, servo_basico, &torreta);
+	fsm_t* player_fsm = fsm_new (WAIT_START, reproductor, &(sistema.player));
+	
+
 
 	next = millis();
 	while (1) {

@@ -14,12 +14,12 @@
 
 #include "piTankGoLib.h"
 
-typedef struct {
+/*typedef struct {
 	int inicio; // Valor correspondiente a la posicion inicial del servo
 	int incremento; // Cuantía en que se incrementa el valor de la posicion con cada movimiento del servo
 	int minimo; // Valor mínimo correspondiente a la posicion del servo
 	int maximo; // Valor maximo correspondiente a la posicion del servo
-} TipoServo;
+} TipoServo;*/
 
 typedef struct {
 	int x; // Coordenada x correspondiente a la posicion del servo horizontal
@@ -31,8 +31,12 @@ typedef struct {
 	TipoServo servo_x;
 	TipoServo servo_y;
 
-	// A completar por el alumno (declaracion del temporizador para control duracion disparo)
-	// ...
+
+	int inicio; // Valor correspondiente a la posicion inicial del servo
+	int incremento; // Cuantía en que se incrementa el valor de la posicion con cada movimiento del servo
+	int minimo; // Valor mínimo correspondiente a la posicion del servo
+	int maximo; // Valor maximo correspondiente a la posicion del servo
+
 } TipoTorreta;
 
 extern int flags_juego;
