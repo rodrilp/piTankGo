@@ -13,31 +13,13 @@
 // INTERVALO DE GUARDA ANTI-REBOTES
 #define	DEBOUNCE_TIME	500
 // DURACION DISPARO IR
-#define SHOOTING_PERIOD 200000
+#define SHOOTING_PERIOD 20000
 
 // CLAVES PARA MUTEX
 // ATENCION: Valores a modificar por el alumno
 #define	SYSTEM_FLAGS_KEY	1
 #define	PLAYER_FLAGS_KEY	2
 #define	STD_IO_BUFFER_KEY	3
-
-// Distribucion de pines GPIO empleada para el teclado
-// ATENCION: Valores a modificar por el alumno
-//#define	TECLADO_ROW_1	0
-//#define	TECLADO_ROW_2	0
-//#define	TECLADO_ROW_3	0
-//#define	TECLADO_ROW_4	0
-//
-//#define	TECLADO_COL_1	0
-//#define	TECLADO_COL_2	0
-//#define	TECLADO_COL_3	0
-//#define	TECLADO_COL_4	0
-
-//#define JOY_PIN_UP	0
-//#define JOY_PIN_DOWN	0
-//#define JOY_PIN_LEFT	0
-//#define JOY_PIN_RIGHT	0
-//#define JOY_PIN_CENTER 0
 
 // Distribucion de pines GPIO empleada para el enlace IR
 // ATENCION: Valores a modificar por el alumno
@@ -78,11 +60,6 @@ enum interruption_sources {
 	TECLADO_FILA_2,
 	TECLADO_FILA_3,
 	TECLADO_FILA_4,
-	//JOYSTICK_UP_ISR,
-	//JOYSTICK_DOWN_ISR,
-	//JOYSTICK_LEFT_ISR,
-	//JOYSTICK_RIGHT_ISR,
-	//JOYSTICK_CENTER_ISR
 };
 
 extern int flags_system;

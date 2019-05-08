@@ -45,17 +45,9 @@ typedef struct {
 	TipoServo servo_y;
 
 	tmr_t* timerDisparo;
-
-	//int inicio; // Valor correspondiente a la posicion inicial del servo
-	//int incremento; // Cuantía en que se incrementa el valor de la posicion con cada movimiento del servo
-	//int minimo; // Valor mínimo correspondiente a la posicion del servo
-	//int maximo; // Valor maximo correspondiente a la posicion del servo
-
 } TipoTorreta;
 
 extern int flags_juego;
-
-
 
 // Prototipos de procedimientos de inicializacion de los objetos especificos
 void InicializaTorreta (TipoTorreta *p_torreta);

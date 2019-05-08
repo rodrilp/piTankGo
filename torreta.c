@@ -1,15 +1,19 @@
 
 #include "torreta.h"
 
-
 //------------------------------------------------------
 // PROCEDIMIENTOS DE INICIALIZACION DE LOS OBJETOS ESPECIFICOS
 //------------------------------------------------------
 
-
+/*
+Inicializamos los valores minimo, maximo y volor de inicio de ambos servos.
+Declaramos los pines de los motores de la torreta como salidas.
+Declaramos tambien los pines de salida de disparo para encender el IR.
+Y configuramos el IR_RX_PIN con una interrupción que al detectar un flanco de subida atienda la interrupción con el método impacto_isr
+Creamos el timer del disparo
+*/
 void InicializaTorreta (TipoTorreta *p_torreta) {
 
-	//flags_juego = 1;
 	p_torreta->servo_x.incremento = SERVO_INCREMENTO;
 	p_torreta->servo_x.minimo 	= SERVO_MINIMO;
 	p_torreta->servo_x.maximo 	= SERVO_MAXIMO;
@@ -61,7 +65,6 @@ void InicializaTorreta (TipoTorreta *p_torreta) {
 	pinMode (IR_RX_PIN, INPUT);
 	pullUpDnControl(IR_RX_PIN, PUD_DOWN);
 	wiringPiISR (IR_RX_PIN, INT_EDGE_RISING, impacto_isr);
-
 
 	p_torreta->timerDisparo = tmr_new(timer_duracion_disparo_isr);
 }
@@ -246,6 +249,13 @@ void MueveTorretaDerecha (fsm_t* this) {
 	}
 }
 
+//------------------------------------------------------
+// Empieza el disparo:
+// se pone el pin IR_TX_PIN a nivel alto
+// empieza el efecto disparo activando el flag FLAG_START_DISPARO
+// empieza el timerDisparo, ya que en caso de no acertar
+// el disparo acabaría por superar el timeout
+//------------------------------------------------------
 void DisparoIR (fsm_t* this) {
 	TipoTorreta *p_torreta = (TipoTorreta * ) this-> user_data;
 
@@ -272,7 +282,10 @@ void DisparoIR (fsm_t* this) {
 
 	tmr_startms(p_torreta->timerDisparo,SHOOTING_PERIOD);
 }
-
+//------------------------------------------------------
+// El disparo se ha acabado por superar el timeout
+// el pin IR_TX_PIN, vuelve a nivel bajo, ya que el disparo ha termiando
+//------------------------------------------------------
 void FinalDisparoIR (fsm_t* this) {
 	piLock(SYSTEM_FLAGS_KEY);
 	flags_juego &= (~FLAG_SHOOT_TIMEOUT);
@@ -285,7 +298,11 @@ void FinalDisparoIR (fsm_t* this) {
 	fflush(stdout);
 	piUnlock (STD_IO_BUFFER_KEY);
 }
-
+//------------------------------------------------------
+// El disparo ha sido detectado:
+// se pone a nivel bajo el pin IR_TX_PIN
+// Y activando el flag FLAG_START_IMPACTO, se inicia el efecto impacto
+//------------------------------------------------------
 void ImpactoDetectado (fsm_t* this) {
 	piLock(SYSTEM_FLAGS_KEY);
 	flags_juego &= (~FLAG_TARGET_DONE);
@@ -303,7 +320,9 @@ void ImpactoDetectado (fsm_t* this) {
 	piUnlock(PLAYER_FLAGS_KEY);
 
 }
-
+//------------------------------------------------------
+// Finaliza el juego y termina el proceso
+//------------------------------------------------------
 void FinalizaJuego (fsm_t* this) {
 	piLock(SYSTEM_FLAGS_KEY);
 	flags_juego &= (~FLAG_SYSTEM_END);
@@ -316,13 +335,18 @@ void FinalizaJuego (fsm_t* this) {
 
 	exit(0);
 }
-
+//------------------------------------------------------
+// Rutina de atención a la interrupción del timerDisparo
+//------------------------------------------------------
 void timer_duracion_disparo_isr (union sigval value){
 	piLock(SYSTEM_FLAGS_KEY);
 	flags_juego |= FLAG_SHOOT_TIMEOUT;
 	piUnlock(SYSTEM_FLAGS_KEY);
 }
-
+//------------------------------------------------------
+// Rutina de atención a la interrupción generada en el puerto IR_RX_PIN
+// al detectar una subida de flanco en su entrada. Acaba de recibir un disparo.
+//------------------------------------------------------
 void impacto_isr(void) {
 	piLock(SYSTEM_FLAGS_KEY);
 	flags_juego |= FLAG_TARGET_DONE;
